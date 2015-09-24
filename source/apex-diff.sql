@@ -21,14 +21,8 @@ define SPOOL_FILENAME = '&2'
 spool &SPOOL_FILENAME.
 declare
 
-  -- TODO mdsouza: remove logger references.
-  -- l_scope logger_logs.scope%type := 'apex-diff';
-
-  -- TODO mdsouza: check sizes and max dbms_output.put_line('');
-  l_sql clob; -- varchar2(4000);
-
-  -- TODO mdsouza: make this a cclb since used in replace and need space
-  l_sql_template clob; -- TODO mdsouza: convert to constant?
+  l_sql clob;
+  l_sql_template clob;
 
   l_app_id apex_applications.application_id%type := &APP_ID.;
 
@@ -46,13 +40,13 @@ declare
 
 begin
   -- Templates
-  -- TODO mdsouza: support sqlcl cursor format
   l_sql_template :=
 'cursor(select %COLUMNS%
 from %APEX_VIEW_NAME%
 where application_id = %APP_ID%
 order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   l_sql_template := replace(l_sql_template, '%APP_ID%', l_app_id);
+
 
   dbms_output.put_line('set sqlformat json');
   dbms_output.put_line('set feedback off');
@@ -68,8 +62,8 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   -- Get all the APEX views, and their columns
   select
     ad.apex_view_name,
-    -- TODO mdsouza: org
     listagg(atc.column_name, ',') within group (order by adc.column_id) cols,
+    -- order by columns will use APEX dictionary recommended list (ignore LOBs)
     listagg(
       case
         when atc.data_type like '%LOB' then null -- can't order by LOBs
@@ -83,7 +77,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     apex_dictionary ad,
     all_tab_columns atc,
     (
-      -- For column ids
+      -- For column ids (order by)
       select apex_view_name, column_name, column_id
       from apex_dictionary
       where column_id != 0) adc
@@ -101,8 +95,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     and atc.column_name = adc.column_name(+)
     -- Columns
     and atc.table_name = upper(ad.apex_view_name)
-    -- TODO mdsouza: see http://www.apex-at-work.com/2010/11/select-current-apex-version-and-user.html
-    and atc.owner = 'APEX_050000' -- TODO mdsouza: change this to dynamic
+    and atc.owner = apex_application.g_flow_schema_owner
     and atc.column_name not in (
       'WORKSPACE',
       'WORKSPACE_DISPLAY_NAME',
@@ -116,7 +109,6 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
       -- 'CREATED_ON',
       'COMPONENT_SIGNATURE'
     )
-    -- TODO mdsouza: valid?
     and atc.data_type not in ('BLOB')
   group by ad.apex_view_name
   order by rn;
@@ -149,7 +141,6 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
 
 exception
   when others then
-    -- logger.log_error('Unhandled Exception', l_scope);
     raise;
 end;
 /
