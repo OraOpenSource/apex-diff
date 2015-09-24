@@ -52,8 +52,9 @@ child = exec(sqlCommand,
       prettyJSON('f' + apexAppId + '.json');
 
       // var filePath = "c:/book/discovery.docx" ;
-      console.log('deleting temp filename');
-      fs.unlinkSync(spoolFilename);
+      // TODO mdsouza: renable
+      // console.log('deleting temp filename');
+      // fs.unlinkSync(spoolFilename);
       // console.log(__dirname);
       // console.log(process.cwd());
     }
