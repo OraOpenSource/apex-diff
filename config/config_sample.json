@@ -1,0 +1,7 @@
+{
+  "connections" : {
+    "sample" : "user/pass@server:port/sid",
+    "giffyDev" : "giffy/giffy@dev.oraopensource.com:11521/xe",
+    "giffyProd" : "giffy/giffy@prod.oraopensource.com:11522/xe"
+  }
+}
