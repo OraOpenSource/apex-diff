@@ -49,7 +49,7 @@ Using the example configuration file above, the following example shows how to c
 
 ```bash
 # Calling from root project folder
-node source/app.js dev 113
+node app.js dev 113
 ```
 
 This will generate a prettified JSON file: `f113.json`.

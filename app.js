@@ -39,7 +39,7 @@ var
   sql = {
     command : '%SQLCL% %CONNECTION% @%DIRECTORY%/%FILENAME% %PARAMS%',
     files : {
-      path : __dirname,
+      path : __dirname + '/source',
       json : {
         fileName : 'f' + arguments.appId + '.json',
         data : ''
@@ -58,7 +58,7 @@ var
     start : new Date()
   },
   options = {
-    configFile : __dirname + '/../config/config.json',
+    configFile : __dirname + '/config/config.json',
     sqlcl : "sql", //Path to sqlcl
     debug : false,
     rebuildTempFile : false // Rebuild the APEX json file
@@ -121,7 +121,7 @@ else{
 //Finish sql.command replacement
 sql.command = sql.command.replace('%SQLCL%', options.sqlcl);
 sql.command = sql.command.replace('%CONNECTION%', options.connections[arguments.connectionName]);
-sql.command = sql.command.replace('%DIRECTORY%', __dirname);
+sql.command = sql.command.replace('%DIRECTORY%', sql.files.path);
 sql.command = sql.command.replace('%APP_ID%', arguments.appId);
 sql.command = sql.command.replace('%SPOOL_FILENAME%', sql.files.path + '/' + sql.files.generateJson.fileName);
 debug('sql.command: ' + sql.command);
