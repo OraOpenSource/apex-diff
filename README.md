@@ -19,7 +19,7 @@ A [Node.js](https://nodejs.org) application has been included with this project.
 ### Config
 Create a new (or copy `config_sample.json`) config file in the `config` folder called `config.json`.
 
-*`debug`*: optional, boolean, default `false`. If `true` will output each step of the process.
+`debug`: optional, boolean, default `false`. If `true` will output each step of the process.
 
 `rebuildTempFile` : optional, boolean, default `false`. If `true`, the temp sql file will be re-generated. Unless upgrdaing APEX, it is not recommended to set this to `true` as it takes additional time to generate the temp sql file.
 
@@ -41,9 +41,8 @@ Example:
 ### Run
 The Node.js application requires two parameters:
 
-`connection name`: This is the name that is found in the `connections` object in `config.json`.
-
-`app_id`: Application ID to generate the JSON for.
+- `connection name`: This is the name that is found in the `connections` object in `config.json`.
+- `app_id`: Application ID to generate the JSON for.
 
 Using the example configuration file above, the following example shows how to call the application:
 
