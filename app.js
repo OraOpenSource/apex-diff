@@ -49,7 +49,7 @@ var
         params : '%APP_ID% %SPOOL_FILENAME%'
       },
       generateJson : {
-        fileName : 'apex_diff_generate_json.sql',
+        fileName : 'temp.sql',
         params : '%APP_ID%'
       }
     }

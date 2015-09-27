@@ -19,13 +19,14 @@ A [Node.js](https://nodejs.org) application has been included with this project.
 ### Config
 Create a new (or copy `config_sample.json`) config file in the `config` folder called `config.json`.
 
-`debug`: optional, boolean, default `false`. If `true` will output each step of the process.
-
-`rebuildTempFile` : optional, boolean, default `false`. If `true`, the temp sql file will be re-generated. Unless upgrdaing APEX, it is not recommended to set this to `true` as it takes additional time to generate the temp sql file.
-
-`sqlcl` : optional, string, default `sql`. Command name (or full path to) SQLcl file.
-
-`connections` : required, JSON object. Name, vaule pair for each database connection.
+- `debug`: optional, boolean, default `false`.
+  - If `true` will output each step of the process.
+- `rebuildTempFile` : optional, boolean, default `false`.
+  - If `true`, the temp sql file will be re-generated. Unless upgrdaing APEX, it is not recommended to set this to `true` as it takes additional time to generate the temp sql file.
+- `sqlcl` : optional, string, default `sql`.
+  - Command name (or full path to) SQLcl file.
+- `connections` : required, JSON object.
+  - Name/value pair for each database connection.
 
 Example:
 ```json
@@ -69,4 +70,22 @@ This will create a new file, `temp.sql` and `f113.json`. `temp.sql` can be delet
 
 
 # Known Issues
-TODO ora-600 issue
+
+## ORA-00600 Error
+If you get an `ORA-00600` error, it is a known bug that was fixed in Oracle 12.1.0.1 but re-appeared in 12.1.0.2:
+
+```sql
+ORA-00600: internal error code, arguments: [qkeIsExprReferenced1], [], [], [], [], [], [], [], [], [], [], []
+00600. 00000 -  "internal error code, arguments: [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s], [%s]"
+*Cause:    This is the generic internal error number for Oracle program
+           exceptions. It indicates that a process has encountered a low-level,
+           unexpected condition. The first argument is the internal message
+           number. This argument and the database version number are critical in
+           identifying the root cause and the potential impact to your system.
+```
+
+If you get it, you my need to add the following to apex-diff.sql:
+
+```sql
+alter system set "_projection_pushdown" = false scope=memory;
+```

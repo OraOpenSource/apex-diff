@@ -1,14 +1,4 @@
--- TODO mdsouza: set sqlformat json
--- TODO mdsouza: find a bash prettify or node.js prettify file for this
--- TODO mdsouza: ordering of items
-
-/* TODO
-echo '{"hello": 1, "foo": "bar"}' | xargs -0 node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 2))"
-cat f113.json | xargs -0 node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 2))" >? f113.json
-cat f113.json | xargs -0 node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 2))" > test.json
-
-*/
-
+-- This file generates a second file which will be used to create the JSON output.
 set serveroutput on size 1000000
 set feedback off
 set verify off
@@ -47,7 +37,9 @@ where application_id = %APP_ID%
 order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   l_sql_template := replace(l_sql_template, '%APP_ID%', chr(38) || 'APP_ID.');
 
-
+  dbms_output.put_line('-- File genereted from apex-diff.sql');
+  dbms_output.put_line('-- DO NOT MODIFY THIS FILE');
+  dbms_output.put_line('');
   dbms_output.put_line('set sqlformat json');
   dbms_output.put_line('set feedback off');
   dbms_output.put_line('set termout off');
