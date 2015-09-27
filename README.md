@@ -9,12 +9,12 @@ This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-
 Mac users can find additional information on how to install and configre SQLcl [here](http://www.talkapex.com/2015/04/installing-sqlcl.html).
 
 # Running
-They're two ways to create a JSON output of an APEX appliaction. SQLcl can be used to call the `apex-diff.sql` file or node.js can be used. It is recommended that you use the node.js wrapper as it handles some additional tasks (such as prettifying the JSON file) behind the scene.
+They're two ways to create a JSON output of an APEX appliaction. SQLcl can be used to call the `apex-diff.sql` file or Node.js can be used. It is recommended that you use the Node.js application as it handles some additional tasks (such as prettifying the JSON file) behind the scene.
 
 _Note: This project may eventually be listed on npm for easy install._
 
 ## Node.js App
-A [Node.js](https://nodejs.org) application has been included with this project. It is recommended to create the JSON file using node.js.
+A [Node.js](https://nodejs.org) application has been included with this project. It is recommended to create the JSON file using Node.js.
 
 ### Config
 Create a new (or copy `config_sample.json`) config file in the `config` folder called `config.json`.
@@ -48,8 +48,8 @@ The Node.js application requires two parameters:
 Using the example configuration file above, the following example shows how to call the application:
 
 ```bash
-# Calling from root project folder
-node app.js dev 113
+# Can call from any directory that you want f113.json in.
+node ~/Documents/GitHub/apex-diff/app.js dev 113
 ```
 
 This will generate a prettified JSON file: `f113.json`.
@@ -66,7 +66,7 @@ Example: _note: I renamed the sql file to sqlcl._
 sqlcl giffy/giffy@localhost:11521/xe @source/apex-diff 113 temp.sql
 ```
 
-This will create a new file, `temp.sql` and `f113.json`. `temp.sql` can be deleted and `f113.json` is the unprettified JSON output of the APEX application. It is up to you to prettify it (or use the node.js app, above).
+This will create a new file, `temp.sql` and `f113.json`. `temp.sql` can be deleted and `f113.json` is the unprettified JSON output of the APEX application. It is up to you to prettify it (or use the Node.js app, above).
 
 
 # Known Issues
@@ -84,7 +84,7 @@ ORA-00600: internal error code, arguments: [qkeIsExprReferenced1], [], [], [], [
            identifying the root cause and the potential impact to your system.
 ```
 
-If you get it, you my need to add the following to apex-diff.sql:
+If you get it, you my need to add the following to `apex-diff.sql`:
 
 ```sql
 alter system set "_projection_pushdown" = false scope=memory;
