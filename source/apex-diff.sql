@@ -45,12 +45,15 @@ begin
 from %APEX_VIEW_NAME%
 where application_id = %APP_ID%
 order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
-  l_sql_template := replace(l_sql_template, '%APP_ID%', l_app_id);
+  l_sql_template := replace(l_sql_template, '%APP_ID%', chr(38) || 'APP_ID.');
 
 
   dbms_output.put_line('set sqlformat json');
   dbms_output.put_line('set feedback off');
   dbms_output.put_line('set termout off');
+  dbms_output.put_line('');
+  -- Variables (this is for the auto build file)
+  dbms_output.put_line('define APP_ID = ''' || chr(38) || '1''');
   dbms_output.put_line('');
   dbms_output.put_line('spool f' || l_app_id || '.json');
 
@@ -96,17 +99,16 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     -- Columns
     and atc.table_name = upper(ad.apex_view_name)
     and atc.owner = apex_application.g_flow_schema_owner
+    -- Remove ID columns as it won't help when comparing apps from different workspaces
+    and (1=2
+      or atc.column_name in ('PAGE_ID') -- safe list
+      or not regexp_like(atc.column_name, '(_id)$','i')
+      )
     and atc.column_name not in (
       'WORKSPACE',
       'WORKSPACE_DISPLAY_NAME',
       'APPLICATION_ID',
       'APPLICATION_NAME',
-      -- TODO mdsouza: do we want to include the audit columns? Could be useful to see who made the changes (or at least a best guess effort)
-      -- TODO mdsouza: make this an option, for now disable.
-      -- 'LAST_UPDATED_BY',
-      -- 'LAST_UPDATED_ON',
-      -- 'CREATED_BY',
-      -- 'CREATED_ON',
       'COMPONENT_SIGNATURE'
     )
     and atc.data_type not in ('BLOB')
@@ -137,7 +139,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
 
   -- TODO mdsouza: make this an option
   dbms_output.put_line('');
-  -- dbms_output.put_line('exit');
+  dbms_output.put_line('exit');
 
 exception
   when others then
@@ -148,6 +150,6 @@ end;
 spool off
 
 
-@&SPOOL_FILENAME.
+@&SPOOL_FILENAME. &APP_ID.
 
 exit

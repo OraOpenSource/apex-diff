@@ -3,6 +3,7 @@
 // TODO mdsouza: debug mode, output each step
 // TODO mdsouza: Put in parameter to handle sqlcl name (default to sql)
 
+// TODO mdsouza: build run file only if not exists or option
 function prettyJSON(fileName){
   console.log('prettyJSON');
   fs.readFile(fileName, 'utf8', function (err,data) {
@@ -29,15 +30,29 @@ var
   exec = require('child_process').exec,
   child,
   sqlConnnection = 'giffy/giffy@localhost:11521/xe', // TODO mdsouza: parameter
-  apexAppId = '113' // TODO mdsouza: parameter
-  sqlCommand = 'sqlcl %SQL_CONNECTION% @%DIRECTORY%/apex-diff %APP_ID% %SPOOL_FILENAME%'
-  spoolFilename = __dirname + '/../temp/delete_me.sql'
-  ;
+  // sqlConnnection = 'insum/insum@localhost:11521/xe', // TODO mdsouza: parameter
+  // sqlConnnection = 'ohtech/OHt3ch98Y@einstein:1522/dev125', // TODO mdsouza: parameter
+  apexAppId = '113', // TODO mdsouza: parameter
+  // apexAppId = '815' // TODO mdsouza: parameter
+  sqlCommand = 'sqlcl %SQL_CONNECTION% @%DIRECTORY%/apex-diff %APP_ID% %SPOOL_FILENAME%',
+  // sqlCommand = 'sqlcl %SQL_CONNECTION% @%DIRECTORY%/apex_diff_generate_json.sql',
+  spoolFilename = __dirname + '/apex_diff_generate_json.sql',
+  timer = {
+    start : new Date(),
+    end : ''}
+;
 
 sqlCommand = sqlCommand.replace('%SQL_CONNECTION%', sqlConnnection);
 sqlCommand = sqlCommand.replace('%APP_ID%', apexAppId);
 sqlCommand = sqlCommand.replace('%DIRECTORY%', __dirname);
 sqlCommand = sqlCommand.replace('%SPOOL_FILENAME%', spoolFilename);
+
+//Test to see if file exists
+// TODO mdsouza:
+if (fs.existsSync(spoolFilename)) {
+    console.log('File Exists');
+}
+
 
 console.log('sqlCommand:', sqlCommand);
 
@@ -58,4 +73,8 @@ child = exec(sqlCommand,
       // console.log(__dirname);
       // console.log(process.cwd());
     }
+
+    // Wrap up
+    timer.end = new Date();
+    console.log('Total Time: ' + (timer.end - timer.start)/1000 + 's');
 });
