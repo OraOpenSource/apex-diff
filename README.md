@@ -1,7 +1,7 @@
-# APEX Diff
+# APEX Diff (Alpha)
 The purpose of this project is to create a export of an APEX application in JSON format. Having the application export in JSON format will allow for easy diffs on different versions of an application
 
-_*This project is still in active development.*_
+_This project is still undergoing active development. As such, configuration and command line options may change._
 
 # Prerequistes
 
@@ -9,6 +9,8 @@ _*This project is still in active development.*_
 This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-tools/sql-developer/downloads/index.html) (_Sep 23, 2015 or above_) is installed. It is used for its ability to quickly output queries in JSON format and cursor support.
 
 Mac users can find additional information on how to install and configre SQLcl [here](http://www.talkapex.com/2015/04/installing-sqlcl.html).
+
+To find the current version of SQLcl, simply run SQLcl and it will be displayed. Minimum required version is `SQLcl: Release 4.2.0.15.265.1501 RC`.
 
 ## Node.js
 Node.js version 0.12.x or greater is required. To find your current version run:
@@ -23,7 +25,7 @@ They're two ways to create a JSON output of an APEX appliaction. SQLcl can be us
 _Note: This project may eventually be listed on npm for easy install._
 
 ## Node.js App
-A [Node.js](https://nodejs.org) application has been included with this project. It is recommended to create the JSON file using Node.js.
+A [Node.js](https://nodejs.org) application has been included with this project and is the recommended method to run APEX Diff.
 
 ### Config
 Create a new (or copy `config_sample.json`) config file in the `config` folder called `config.json`.
