@@ -48,7 +48,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   -- Variables (this is for the auto build file)
   dbms_output.put_line('define APP_ID = ''' || chr(38) || '1''');
   dbms_output.put_line('');
-  dbms_output.put_line('spool f' || l_app_id || '.json');
+  dbms_output.put_line('spool f' || chr(38) || 'APP_ID..json');
 
 
   -- Creating parent select statement
