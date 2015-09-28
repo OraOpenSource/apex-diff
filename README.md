@@ -4,9 +4,18 @@ The purpose of this project is to create a export of an APEX application in JSON
 _*This project is still in active development.*_
 
 # Prerequistes
+
+## SQLcl
 This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-tools/sql-developer/downloads/index.html) (_Sep 23, 2015 or above_) is installed. It is used for its ability to quickly output queries in JSON format and cursor support.
 
 Mac users can find additional information on how to install and configre SQLcl [here](http://www.talkapex.com/2015/04/installing-sqlcl.html).
+
+## Node.js
+Node.js version 0.12.x or greater is required. To find your current version run:
+
+```bash
+node --version
+```
 
 # Running
 They're two ways to create a JSON output of an APEX appliaction. SQLcl can be used to call the `apex-diff.sql` file or Node.js can be used. It is recommended that you use the Node.js application as it handles some additional tasks (such as prettifying the JSON file) behind the scene.
