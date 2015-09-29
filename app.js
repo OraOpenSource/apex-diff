@@ -3,6 +3,10 @@
  * oraopensource.com
  * Project & license info: https://github.com/OraOpenSource/apex-diff
  */
+var fs = require('fs');
+var execSync = require('child_process').execSync;
+var extend = require('util')._extend;
+var path = require('path');
 
 /**
  * Wrapper for console statement
@@ -18,14 +22,10 @@ function debug(){
  * Logs time from start of app.js
  */
 function logTime(){
-  debug('Time: ' + (new Date() - timer.start)/1000 + 's');
+  debug('Time:', (new Date() - timer.start)/1000 + 's');
 }
 
 var
-  //Requires
-  fs = require('fs'),
-  execSync = require('child_process').execSync,
-  extend = require('util')._extend,
   //Console
   log = console.log,
   childProcess,
@@ -37,20 +37,22 @@ var
   },
   //SQL
   sql = {
-    command : '%SQLCL% %CONNECTION% @%DIRECTORY%/%FILENAME% %PARAMS%',
+    command : '%SQLCL% %CONNECTION% @%FULL_PATH% %PARAMS%',
     files : {
-      path : __dirname + '/source',
+      path : path.resolve(__dirname,'source'),
       json : {
         fileName : 'f' + arguments.appId + '.json',
         data : ''
       },
       apexDiff : {
         fileName : 'apex-diff.sql',
-        params : '%APP_ID% %SPOOL_FILENAME%'
+        params : '%APP_ID% %SPOOL_FILENAME%',
+        fullPath : ''
       },
       generateJson : {
         fileName : 'temp.sql',
-        params : '%APP_ID%'
+        params : '%APP_ID%',
+        fullPath : ''
       }
     }
   },
@@ -58,16 +60,20 @@ var
     start : new Date()
   },
   options = {
-    configFile : __dirname + '/config/config.json',
+    configFile : path.resolve(__dirname , 'config/config.json'),
     sqlcl : "sql", //Path to sqlcl
     debug : false,
     rebuildTempFile : false // Rebuild the APEX json file
   }
 ;
 
+//Additional settings
+sql.files.apexDiff.fullPath = path.resolve(sql.files.path, sql.files.apexDiff.fileName);
+sql.files.generateJson.fullPath = path.resolve(sql.files.path, sql.files.generateJson.fileName);
+
 // Look for config file
 if (!fs.existsSync(options.configFile)) {
-  console.log('Missing config file: ' + options.configFile);
+  console.log('Missing config file:', options.configFile);
   console.log('See TODO (doc link) for more info');
   process.exit(1);
 }
@@ -79,8 +85,8 @@ else{
 }
 
 //General debug (can do here since value is set)
-debug('sql: ', sql);
-debug('arguments: ',  arguments);
+debug('sql:', sql);
+debug('arguments:',  arguments);
 
 
 // VALIDATIONS
@@ -94,8 +100,8 @@ else if (!arguments.appId) {
   process.exit(1);
 }
 else if (!options.connections[arguments.connectionName]) {
-  console.log('Invalid connection: ' + arguments.connectionName);
-  console.log('Valid connections: ' + Object.keys(options.connections).toString());
+  console.log('Invalid connection:', arguments.connectionName);
+  console.log('Valid connections:', Object.keys(options.connections).toString());
   process.exit(1);
 }
 
@@ -106,25 +112,24 @@ logTime();
 debug('Setting up sql.command');
 
 // Determine if file should be rebuilt
-if (options.rebuildTempFile || !fs.existsSync(sql.files.path + '/' + sql.files.generateJson.fileName)){
+if (options.rebuildTempFile || !fs.existsSync(sql.files.generateJson.fullPath)){
   // Need to run the main apex-diff script to regenerate the JSON file
   debug('Rebuilding generateJson file');
-  sql.command = sql.command.replace('%FILENAME%', sql.files.apexDiff.fileName);
+  sql.command = sql.command.replace('%FULL_PATH%', sql.files.apexDiff.fullPath);
   sql.command = sql.command.replace('%PARAMS%', sql.files.apexDiff.params);
 }
 else{
   debug('Just running generateJson');
-  sql.command = sql.command.replace('%FILENAME%', sql.files.generateJson.fileName);
+  sql.command = sql.command.replace('%FULL_PATH%', sql.files.generateJson.fullPath);
   sql.command = sql.command.replace('%PARAMS%', sql.files.generateJson.params);
 }
 
 //Finish sql.command replacement
 sql.command = sql.command.replace('%SQLCL%', options.sqlcl);
 sql.command = sql.command.replace('%CONNECTION%', options.connections[arguments.connectionName]);
-sql.command = sql.command.replace('%DIRECTORY%', sql.files.path);
 sql.command = sql.command.replace('%APP_ID%', arguments.appId);
-sql.command = sql.command.replace('%SPOOL_FILENAME%', sql.files.path + '/' + sql.files.generateJson.fileName);
-debug('sql.command: ' + sql.command);
+sql.command = sql.command.replace('%SPOOL_FILENAME%', sql.files.generateJson.fullPath);
+debug('sql.command:', sql.command);
 
 debug('Running sql.command');
 childProcess = execSync(sql.command,{ encoding: 'utf8' });
