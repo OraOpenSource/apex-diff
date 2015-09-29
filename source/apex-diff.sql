@@ -84,7 +84,20 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     and ad.apex_view_name not like 'APEX_TEAM%'
     and ad.apex_view_name not like 'APEX_WORKSPACE%'
     and ad.apex_view_name not like 'APEX_WS%'
-    and ad.apex_view_name not in ('APEX_APPLICATIONS', 'APEX_APPLICATION_GROUPS','APEX_THEMES')
+    and ad.apex_view_name not in (
+      'APEX_APPLICATIONS',
+      'APEX_APPLICATION_GROUPS',
+      'APEX_THEMES',
+      -- These IR reports are for user level IRs
+      'APEX_APPLICATION_PAGE_IR_COMP',
+      'APEX_APPLICATION_PAGE_IR_COND',
+      'APEX_APPLICATION_PAGE_IR_GRPBY',
+      'APEX_APPLICATION_PAGE_IR_PIVOT',
+      'APEX_APPLICATION_PAGE_IR_PVAGG',
+      'APEX_APPLICATION_PAGE_IR_PVSRT',
+      'APEX_APPLICATION_PAGE_IR_RPT',
+      'APEX_APPLICATION_PAGE_IR_SUB'
+    )
     and ad.apex_view_name != 'APEX_APPLICATION_TRANS_MAP' -- doesn't contain application_id
     -- APEX dictionary columns
     and atc.table_name = adc.apex_view_name(+)
