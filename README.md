@@ -41,7 +41,7 @@ Create a new (or copy `config_sample.json`) config file in the `config` folder c
 - `filters` : options, array of regular expressions to remove objects from JSON file
   - The filter will be applied on both the `apex_view_name` and the `apex_view_name.column_name`
   - It is case insensitive
-  - In the example below, the filter will remove the view all columns that contiain `updated` in it (this is `updated_by` and `updated_on`) as well as the `apex_application_lists` view.
+  - In the example below, the filter will remove all columns that contain `updated` in it (this is `updated_by` and `updated_on`) as well as the `apex_application_lists` view.
 
 Example:
 ```json
