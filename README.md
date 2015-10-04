@@ -38,6 +38,10 @@ Create a new (or copy `config_sample.json`) config file in the `config` folder c
   - Command name (or full path to) SQLcl file.
 - `connections` : required, JSON object.
   - Name/value pair for each database connection.
+- `filters` : options, array of regular expressions to remove objects from JSON file
+  - The filter will be applied on both the `apex_view_name` and the `apex_view_name.column_name`
+  - It is case insensitive
+  - In the example below, the filter will remove the view all columns that contiain `updated` in it (this is `updated_by` and `updated_on`) as well as the `apex_application_lists` view.
 
 Example:
 ```json
@@ -46,7 +50,11 @@ Example:
   "connections" : {
     "dev" : "giffy/giffy@localhost:11521/xe",
     "prod" : "oos/oos@prod.oraopensource.com:1521/xe"
-  }
+  },
+  "filters" : [
+    ".*\\.updated.*",
+    "^apex_application_lists$"
+  ]
 }
 ```
 

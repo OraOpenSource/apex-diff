@@ -19,6 +19,25 @@ function debug(){
 }//debug
 
 /**
+ * Determines if a specific object should be deleted based on filter
+ *
+ * Returns true or false
+ */
+function filterObject(name){
+  var lReturn = false;
+
+  for(var i in options.filtersRegExp){
+    if(options.filtersRegExp[i].test(name)){
+      lReturn = true;
+      break;
+    }
+  }//for
+
+  return lReturn;
+}//filterObject
+
+
+/**
  * Logs time from start of app.js
  */
 function logTime(){
@@ -63,7 +82,9 @@ var
     configFile : path.resolve(__dirname , 'config/config.json'),
     sqlcl : "sql", //Path to sqlcl
     debug : false,
-    rebuildTempFile : false // Rebuild the APEX json file
+    rebuildTempFile : false, // Rebuild the APEX json file
+    filters : [], // array of filters
+    filtersRegExp : [] // array of filters to Regular Expressions
   }
 ;
 
@@ -81,8 +102,17 @@ else{
   // Load config file
   var configFileData = fs.readFileSync(options.configFile, 'utf8');
   options = extend(options, JSON.parse(configFileData));
+
+// TODO mdsouza: support for connection specific filters
+
+  // Convert filters to RegExp objects
+  for (var i in options.filters) {
+    options.filtersRegExp[options.filtersRegExp.length] = new RegExp(options.filters[i], 'i');
+  }
+
   debug('options', options);
 }
+
 
 //General debug (can do here since value is set)
 debug('sql:', sql);
@@ -140,6 +170,39 @@ debug('Reading .json file');
 sql.files.json.data = fs.readFileSync(sql.files.json.fileName, 'utf8');
 //Convert string to JSON
 sql.files.json.data = JSON.parse(sql.files.json.data);
+logTime();
+
+
+// TODO mdsouza: add option that connections can be a straight connection or an JSON object that contains connectionDetails, filters
+
+
+debug('Filtering JSON');
+for (var apexView in sql.files.json.data.items[0]){
+  // This loop is the list of APEX views.
+  // TODO mdsouza: remove re
+
+  // If delete slows things down can look at setting to undefined
+  // http://stackoverflow.com/questions/208105/how-to-remove-a-property-from-a-javascript-object
+  //Check to see about removing entire APEX view itself.
+  if (filterObject(apexView)){
+    debug('Deleting:', apexView);
+    delete sql.files.json.data.items[0][apexView];
+  }
+  else{
+    // view not filtered, now check array of objects
+    for (var apexViewAttrPos in sql.files.json.data.items[0][apexView]){
+      //Loop over each element/attribte
+      for (var apexViewAttrName in sql.files.json.data.items[0][apexView][apexViewAttrPos]){
+        if (filterObject(apexView + '.' + apexViewAttrName)){
+          debug('Deleting:', apexView + '.' + apexViewAttrName);
+          delete sql.files.json.data.items[0][apexView][apexViewAttrPos][apexViewAttrName];
+        }
+      }//j
+    }//i
+  }//else
+} // For (remove elements)
+logTime();
+
 //Prettify
 sql.files.json.data = (JSON.stringify(sql.files.json.data, null, 2));
 logTime();
