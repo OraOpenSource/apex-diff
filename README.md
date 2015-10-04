@@ -42,7 +42,7 @@ Create a new (or copy `config_sample.json`) config file in the `config` folder c
   - The filter will be applied on both the `apex_view_name` and the `apex_view_name.column_name`
   - It is case insensitive
   - In the example below, the filter will remove all columns that contain `updated` in it (this is `updated_by` and `updated_on`) as well as the `apex_application_lists` view.
-  - Any `\` need to be escaped with `\\` as the regular expression must also be a valid JSON string.
+  - Any `\` needs to be escaped with `\\` as the regular expression must also be a valid JSON string.
 
 Example:
 ```json
