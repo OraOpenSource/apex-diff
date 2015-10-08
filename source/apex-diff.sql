@@ -158,4 +158,6 @@ spool off
 
 @&SPOOL_FILENAME. &APP_ID.
 
+-- TODO mdsouza: add option to export APEX application as well (.sql file)
+
 exit

@@ -44,6 +44,23 @@ function logTime(){
   debug('Time:', (new Date() - timer.start)/1000 + 's');
 }
 
+// TODO mdsouza:
+//http://stackoverflow.com/questions/1584370/how-to-merge-two-arrays-in-javascript-and-de-duplicate-items
+// Array.prototype.unique = function() {
+//     var a = this.concat();
+//     for(var i=0; i<a.length; ++i) {
+//         for(var j=i+1; j<a.length; ++j) {
+//             if(a[i] === a[j])
+//                 a.splice(j--, 1);
+//         }
+//     }
+//
+//     return a;
+// };
+
+
+// TODO mdsouza: update docs on filter groups
+// TODO mdsouza: include some sample filter groups in config_sample.json
 var
   //Console
   log = console.log,
@@ -82,10 +99,18 @@ var
     configFile : path.resolve(__dirname , 'config/config.json'),
     sqlcl : "sql", //Path to sqlcl
     debug : false,
-    rebuildTempFile : false, // Rebuild the APEX json file
+    rebuildTempFile : true, // Rebuild the APEX json file
     filters : [], // array of filters
-    filtersRegExp : [] // array of filters to Regular Expressions
-  }
+    filterGroups : {},
+    filtersRegExp : [], // array of filters to Regular Expressions
+    connectionDetails : "",
+    // TODO mdsouza: document this for developers
+    dev : {
+      runSql : true,
+      saveJson : true
+    }
+  },
+  temp = ''
 ;
 
 //Additional settings
@@ -98,34 +123,16 @@ if (!fs.existsSync(options.configFile)) {
   console.log('See TODO (doc link) for more info');
   process.exit(1);
 }
-else{
-  // Load config file
-  var configFileData = fs.readFileSync(options.configFile, 'utf8');
-  options = extend(options, JSON.parse(configFileData));
-
-// TODO mdsouza: support for connection specific filters
-
-  // Convert filters to RegExp objects
-  for (var i in options.filters) {
-    options.filtersRegExp[options.filtersRegExp.length] = new RegExp(options.filters[i], 'i');
-  }
-
-  debug('options', options);
-}
 
 
-//General debug (can do here since value is set)
-debug('sql:', sql);
-debug('arguments:',  arguments);
+// Load config file
+var configFileData = fs.readFileSync(options.configFile, 'utf8');
+options = extend(options, JSON.parse(configFileData));
 
+debug('options extended by confiFile:\n', options, '\n');
 
-// VALIDATIONS
-// Check that argument has two parameters (connection and appid)
-if (!arguments.connectionName){
-  console.log('Missing connection string');
-  process.exit(1);
-}
-else if (!arguments.appId) {
+debug('\n* Initial Validations*');
+if (!arguments.appId) {
   console.log('Missing appId');
   process.exit(1);
 }
@@ -135,8 +142,80 @@ else if (!options.connections[arguments.connectionName]) {
   process.exit(1);
 }
 
-debug('Validations passed');
+
+//Parse connection information
+var curConn = options.connections[arguments.connectionName];
+debug('\ncurConn:', curConn);
+
+if (curConn.constructor !== Object){
+  debug('\ncurConn is string');
+  //Connection info is a string (just connection details)
+  options.connectionDetails = curConn;
+}
+else {
+  debug('\ncurConn is JSON, parsing');
+  //Connection info is a JSON object
+  curConn = extend(
+    {
+      connectionDetails : "",
+      filters : ""
+    },
+    curConn);
+
+  //Current connection is
+  options.connectionDetails = curConn.connectionDetails;
+
+  //Only add filters if exists
+  if (curConn.filters) {
+    options.filters = options.filters.concat(curConn.filters);
+  }
+
+  // Add filters from filterGroups to curConn
+  if (curConn.filterGroups){
+    for (var i in curConn.filterGroups){
+
+      temp = options.filterGroups[curConn.filterGroups[i]];
+      if (temp){
+        options.filters = options.filters.concat(temp);
+      }
+
+    }//for
+  }// filter groups defined
+}//connection info is JSON object
+
+//Make filters unique
+// TODO mdsouza: Make filters unique
+
+// Convert filters to RegExp objects
+debug('\nConverting filters to RegExp\n')
+for (var i in options.filters) {
+  debug('Filter RegExp:', options.filters[i]);
+  options.filtersRegExp[options.filtersRegExp.length] = new RegExp(options.filters[i], 'i');
+}
+
+debug('\noptions', options);
+
+
+//General debug (can do here since value is set)
+debug('\nsql:', sql);
+debug('\narguments:',  arguments);
+
+
+// VALIDATIONS
+debug('\n* Validations *');
+
+// Check that argument has two parameters (connection and appid)
+if (!options.connectionDetails){
+  console.log('Missing connection details');
+  process.exit(1);
+}
+
+debug('\nValidations passed');
 logTime();
+
+
+// // TODO mdsouza:
+// process.exit(1);
 
 
 debug('Setting up sql.command');
@@ -156,31 +235,29 @@ else{
 
 //Finish sql.command replacement
 sql.command = sql.command.replace('%SQLCL%', options.sqlcl);
-sql.command = sql.command.replace('%CONNECTION%', options.connections[arguments.connectionName]);
+sql.command = sql.command.replace('%CONNECTION%', options.connectionDetails);
 sql.command = sql.command.replace('%APP_ID%', arguments.appId);
 sql.command = sql.command.replace('%SPOOL_FILENAME%', sql.files.generateJson.fullPath);
 debug('sql.command:', sql.command);
 
-debug('Running sql.command');
-childProcess = execSync(sql.command,{ encoding: 'utf8' });
-debug(childProcess);
-logTime();
 
-debug('Reading .json file');
+if (options.dev.runSql){
+  debug('Running sql.command');
+  childProcess = execSync(sql.command,{ encoding: 'utf8' });
+  debug(childProcess);
+  logTime();
+}
+
+debug('\nReading .json file');
 sql.files.json.data = fs.readFileSync(sql.files.json.fileName, 'utf8');
 //Convert string to JSON
 sql.files.json.data = JSON.parse(sql.files.json.data);
 logTime();
 
 
-// TODO mdsouza: add option that connections can be a straight connection or an JSON object that contains connectionDetails, filters
-
-
-debug('Filtering JSON');
+debug('\nFiltering JSON');
 for (var apexView in sql.files.json.data.items[0]){
   // This loop is the list of APEX views.
-  // TODO mdsouza: remove re
-
   // If delete slows things down can look at setting to undefined
   // http://stackoverflow.com/questions/208105/how-to-remove-a-property-from-a-javascript-object
   //Check to see about removing entire APEX view itself.
@@ -207,8 +284,10 @@ logTime();
 sql.files.json.data = (JSON.stringify(sql.files.json.data, null, 2));
 logTime();
 
-debug('Writing pretty JSON to file');
-fs.writeFileSync(sql.files.json.fileName, sql.files.json.data);
+if(options.dev.saveJson){
+  debug('Writing pretty JSON to file');
+  fs.writeFileSync(sql.files.json.fileName, sql.files.json.data);
+}
 
 // END
 logTime();

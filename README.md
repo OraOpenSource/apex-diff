@@ -3,7 +3,7 @@ The purpose of this project is to create a export of an APEX application in JSON
 
 _This project is still undergoing active development. As such, configuration and command line options may change._
 
-# Prerequistes
+# Prerequisites
 
 ## SQLcl
 This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-tools/sql-developer/downloads/index.html) (_Sep 23, 2015 or above_) is installed. It is used for its ability to quickly output queries in JSON format and cursor support.
@@ -13,53 +13,75 @@ Mac users can find additional information on how to install and configre SQLcl [
 To find the current version of SQLcl, simply run SQLcl and it will be displayed. Minimum required version is `SQLcl: Release 4.2.0.15.265.1501 RC`.
 
 ## Node.js
-Node.js version 0.12.x or greater is required. To find your current version run:
+[Node.js](https://nodejs.org) version 0.12.x or greater is required. To find your current version run:
 
 ```bash
 node --version
 ```
 
 # Running
-They're two ways to create a JSON output of an APEX appliaction. SQLcl can be used to call the `apex-diff.sql` file or Node.js can be used. It is recommended that you use the Node.js application as it handles some additional tasks (such as prettifying the JSON file) behind the scene.
+
+## Download
+Either download this project from GitHub or clone it using git:
+`git clone https://github.com/OraOpenSource/apex-diff.git`
 
 _Note: This project may eventually be listed on npm for easy install._
 
-## Node.js App
-A [Node.js](https://nodejs.org) application has been included with this project and is the recommended method to run APEX Diff.
-
-### Config
+## Config
 Create a new (or copy `config_sample.json`) config file in the `config` folder called `config.json`.
 
 - `debug`: optional, boolean, default `false`.
   - If `true` will output each step of the process.
-- `rebuildTempFile` : optional, boolean, default `false`.
-  - If `true`, the temp sql file will be re-generated. Unless upgrdaing APEX, it is not recommended to set this to `true` as it takes additional time to generate the temp sql file.
+- `rebuildTempFile` : optional, boolean, default `true`.
+  - If `true`, the temp sql file will be re-generated. Unless upgrading APEX, it is not recommended to set this to `true` as it takes additional time to generate the temp sql file.
 - `sqlcl` : optional, string, default `sql`.
   - Command name (or full path to) SQLcl file.
-- `connections` : required, JSON object.
-  - Name/value pair for each database connection.
-- `filters` : options, array of regular expressions to remove objects from JSON file
-  - The filter will be applied on both the `apex_view_name` and the `apex_view_name.column_name`
-  - It is case insensitive
-  - In the example below, the filter will remove all columns that contain `updated` in it (this is `updated_by` and `updated_on`) as well as the `apex_application_lists` view.
+- `filters` : optional, array of regular expressions to remove objects from JSON file
+  - The filter will be applied on both the `apex_view_name` and the `apex_view_name.column_name`.
+  - Filters will be applied for all connections.
+  - It is case insensitive.
   - Any `\` needs to be escaped with `\\` as the regular expression must also be a valid JSON string.
+- `filterGroups` : optional, JSON object, defining set of filterGroups.
+  - Define a set of filters that can then be easily applied to specific connections
+  - Each entry is a name/value pair.
+  - Value is an array of filters that correspond to the filterGroup
+- `connections` : required, JSON object.
+  - Name/value pair for each database connection or connection object
+  - Connection Object: Use this for specific connection information for a connection
+    - `connectionDetails`: required, database connection
+    - `filters`: optional, array of filters (see `filters` above)
+    - `filterGroups`: optional, array of list of `filterGroups` to apply
+
 
 Example:
 ```json
 {
   "sqlcl" : "sqlcl",
   "connections" : {
-    "dev" : "giffy/giffy@localhost:11521/xe",
+    "dev" : {
+      "connectionDetails" : "giffy/giffy@localhost:11521/xe",
+      "filters" : ["apex_application_pages"],
+      "filterGroups" : ["updateInfo"]
+    },
     "prod" : "oos/oos@prod.oraopensource.com:1521/xe"
   },
-  "filters" : [
-    ".*\\.updated.*",
-    "^apex_application_lists$"
-  ]
+  "filters" : ["apex_application_lists"],
+  "filterGroups" : {
+    "updateInfo" : [".+\\..+_updated_.*"]
+  }
 }
 ```
 
-### Run
+Example Explanation:
+
+- `filters`: For all connections data for `apex_application_lists` will be removed.
+- `connections`: They're two connections, `dev` and `prod`,
+  - `dev`:
+    - `filters`: Just for this connection, all entries for `apex_application_pages` will be removed.
+    - `filterGroups`: Any filters defined in the `filterGroup` `updateInfo` will be applied. In this example, all column names that contain `_updated_` will be removed.
+- `filterGroups`: A filterGroup called `updateInfo` has been created and can be applied to individual connections.
+
+## Run
 The Node.js application requires two parameters:
 
 - `connection name`: This is the name that is found in the `connections` object in `config.json`.
@@ -74,20 +96,22 @@ node ~/Documents/GitHub/apex-diff/app.js dev 113
 
 This will generate a prettified JSON file: `f113.json`.
 
-## SQLcl
-To run the application directly using SQLcl:
+# Developers
+To help with future development, the following configuration can be added to `config.json`:
 
-```sql
-<sqlcl command> <connection string> @<path to apex-diff.sql> <app_id> <temp spool filename>
+- `dev`
+  - `runSql`: `boolean` - If false, will skip over the SQL command. This is useful for testing JSON parsing.
+  - `saveJson`: `boolean` - If false, will not save any changes to the JSON file.
+
+Example:
+```json
+...
+"dev" : {
+  "runSql" : false,
+  "saveJson" : true
+}
+...
 ```
-
-Example: _note: I renamed the sql file to sqlcl._
-```sql
-sqlcl giffy/giffy@localhost:11521/xe @source/apex-diff 113 temp.sql
-```
-
-This will create a new file, `temp.sql` and `f113.json`. `temp.sql` can be deleted and `f113.json` is the unprettified JSON output of the APEX application. It is up to you to prettify it (or use the Node.js app, above).
-
 
 # Known Issues
 
