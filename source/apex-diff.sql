@@ -105,11 +105,6 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     -- Columns
     and atc.table_name = upper(ad.apex_view_name)
     and atc.owner = apex_application.g_flow_schema_owner
-    -- Remove ID columns as it won't help when comparing apps from different workspaces
-    and (1=2
-      or atc.column_name in ('PAGE_ID') -- safe list
-      or not regexp_like(atc.column_name, '(_id)$','i')
-      )
     and atc.column_name not in (
       'WORKSPACE',
       'WORKSPACE_DISPLAY_NAME',

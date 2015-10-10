@@ -8,6 +8,7 @@
     },
     "prod" : "giffy/giffy@prod.oraopensource.com:11522/xe"
   },
+  "filters" : ["^(.(?!page_id$))*_id$"],
   "filterGroups" : {
     "updateInfo" : [".+\\..+_updated_.*"]
   }

@@ -113,6 +113,18 @@ Example:
 ...
 ```
 
+## Filter Examples
+The following is a list of filters that you can either at to a `filters` option or a `filterGroup`. _Note: the filters are already escaped for JSON use. If testing in a regexp tester ensure to unescape._
+
+Filter  | Description
+------------- | -------------
+`^(.(?!page_id$))*_id$` | Exclude all id columns except for `page_id`
+`.+\\..+_updated_.*` | All columns that contain the name `_updated_`
+`.+\\.(items|buttons|display_sequence)` | Exclude all columns with ..
+`apex_application_templates.reference_count` |
+
+
+
 # Known Issues
 
 ## ORA-00600 Error
