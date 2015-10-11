@@ -91,8 +91,8 @@ _All entries tagged with a `*` are recommended default filters._
 * | `^(.(?!page_id$))*_id$` | Exclude all id columns except for `page_id`
 * | `.+\\..+_updated_.*` | All columns that contain the name `_updated_`
 * | `.+\\.(items|buttons|display_sequence)` | Exclude all columns with ..
-| `apex_application_templates.reference_count` | Self Explanatory
-| `apex_application_auth` | All entries for the `apex_application_auth` view
+ | `apex_application_templates.reference_count` | Self Explanatory
+ | `apex_application_auth` | All entries for the `apex_application_auth` view
 
 
 ## Run
