@@ -18,6 +18,7 @@ declare
 
   type rec_apex_info is record(
     apex_view_name apex_dictionary.apex_view_name%type,
+    custom_predicates varchar2(4000), -- Custom predicates
     cols varchar2(4000),
     order_by varchar2(4000),
     rn number,
@@ -32,8 +33,10 @@ begin
   -- Templates
   l_sql_template :=
 'cursor(select %COLUMNS%
-from %APEX_VIEW_NAME%
-where application_id = %APP_ID%
+from %APEX_VIEW_NAME% avn
+where 1=1
+  and avn.application_id = %APP_ID%
+  %CUSTOM_PREDICATES%
 order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   l_sql_template := replace(l_sql_template, '%APP_ID%', chr(38) || 'APP_ID.');
 
@@ -58,6 +61,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   -- Get all the APEX views, and their columns
   select
     ad.apex_view_name,
+    ad.custom_predicates,
     listagg(atc.column_name, ',') within group (order by adc.column_id) cols,
     -- order by columns will use APEX dictionary recommended list (ignore LOBs)
     listagg(
@@ -70,7 +74,27 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     count(1) over () cnt
   bulk collect into l_apex_info
   from
-    apex_dictionary ad,
+    (
+      select
+        case
+          -- #12 Save default (public) IR settings only
+          -- Note: Query is forced to lower, so manually force items to upper when necessary
+          when ad.apex_view_name = 'APEX_APPLICATION_PAGE_IR_RPT' then
+            q'!and avn.status = upper('PUBLIC')!'
+          when ad.apex_view_name in ('APEX_APPLICATION_PAGE_IR_COMP', 'APEX_APPLICATION_PAGE_IR_COND','APEX_APPLICATION_PAGE_IR_GRPBY','APEX_APPLICATION_PAGE_IR_PIVOT','APEX_APPLICATION_PAGE_IR_PVAGG','APEX_APPLICATION_PAGE_IR_PVSRT') then
+            q'!and avn.report_id in (
+              select ir.report_id
+              from apex_application_page_ir_rpt ir
+              where 1=1
+                and ir.application_id = avn.application_id
+                and ir.status = upper('PUBLIC'))!'
+          else null
+        end custom_predicates,
+        ad.*
+      from apex_dictionary ad
+      where 1=1
+        and ad.column_id = 0
+      ) ad,
     all_tab_columns atc,
     (
       -- For column ids (order by)
@@ -78,7 +102,6 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
       from apex_dictionary
       where column_id != 0) adc
   where 1=1
-    and ad.column_id = 0
     -- APEX views
     and ad.apex_view_name not like 'APEX_UI%' -- TODO mdsouza: exclude?
     and ad.apex_view_name not like 'APEX_TEAM%'
@@ -89,13 +112,6 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
       'APEX_APPLICATION_GROUPS',
       'APEX_THEMES',
       -- These IR reports are for user level IRs
-      'APEX_APPLICATION_PAGE_IR_COMP',
-      'APEX_APPLICATION_PAGE_IR_COND',
-      'APEX_APPLICATION_PAGE_IR_GRPBY',
-      'APEX_APPLICATION_PAGE_IR_PIVOT',
-      'APEX_APPLICATION_PAGE_IR_PVAGG',
-      'APEX_APPLICATION_PAGE_IR_PVSRT',
-      'APEX_APPLICATION_PAGE_IR_RPT',
       'APEX_APPLICATION_PAGE_IR_SUB'
     )
     and ad.apex_view_name != 'APEX_APPLICATION_TRANS_MAP' -- doesn't contain application_id
@@ -113,7 +129,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
       'COMPONENT_SIGNATURE'
     )
     and atc.data_type not in ('BLOB')
-  group by ad.apex_view_name
+  group by ad.apex_view_name, ad.custom_predicates
   order by rn;
 
   for i in 1 .. l_apex_info.count loop
@@ -121,6 +137,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     l_sql := replace(l_sql_template, '%COLUMNS%', l_apex_info(i).cols);
     l_sql := replace(l_sql, '%APEX_VIEW_NAME%', l_apex_info(i).apex_view_name);
     l_sql := replace(l_sql, '%ORDER_BY%', l_apex_info(i).order_by);
+    l_sql := replace(l_sql, '%CUSTOM_PREDICATES%', l_apex_info(i).custom_predicates);
     l_sql := lower(l_sql);
 
     dbms_output.put_line(l_sql);
