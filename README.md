@@ -81,6 +81,17 @@ Example Explanation:
     - `filterGroups`: Any filters defined in the `filterGroup` `updateInfo` will be applied. In this example, all column names that contain `_updated_` will be removed.
 - `filterGroups`: A filterGroup called `updateInfo` has been created and can be applied to individual connections.
 
+### Filter Examples
+The following is a list of filters that you can either at to a `filters` option or a `filterGroup`. _Note: the filters are already escaped for JSON use. If testing in a regexp tester ensure to unescape._
+
+Filter  | Description
+------------- | -------------
+`^(.(?!page_id$))*_id$` | Exclude all id columns except for `page_id`
+`.+\\..+_updated_.*` | All columns that contain the name `_updated_`
+`.+\\.(items|buttons|display_sequence)` | Exclude all columns with ..
+`apex_application_templates.reference_count` |
+
+
 ## Run
 The Node.js application requires two parameters:
 
@@ -112,18 +123,6 @@ Example:
 }
 ...
 ```
-
-## Filter Examples
-The following is a list of filters that you can either at to a `filters` option or a `filterGroup`. _Note: the filters are already escaped for JSON use. If testing in a regexp tester ensure to unescape._
-
-Filter  | Description
-------------- | -------------
-`^(.(?!page_id$))*_id$` | Exclude all id columns except for `page_id`
-`.+\\..+_updated_.*` | All columns that contain the name `_updated_`
-`.+\\.(items|buttons|display_sequence)` | Exclude all columns with ..
-`apex_application_templates.reference_count` |
-
-
 
 # Known Issues
 
