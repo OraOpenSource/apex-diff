@@ -48,6 +48,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   dbms_output.put_line('set feedback off');
   dbms_output.put_line('set termout off');
   dbms_output.put_line('set verify off'); -- Removes the old/new sub string
+  dbms_output.put_line('set sqlblanklines on'); -- Allows for blank lines caused by CUSTOM_PREDICATES
   dbms_output.put_line('');
   -- Variables (this is for the auto build file)
   dbms_output.put_line('define APP_ID = ''' || chr(38) || '1''');
