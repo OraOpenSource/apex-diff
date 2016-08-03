@@ -3,6 +3,7 @@ set serveroutput on size 1000000
 set feedback off
 set verify off
 set termout off
+set linesize 9999
 
 
 define APP_ID = '&1'
