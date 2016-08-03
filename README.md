@@ -3,14 +3,14 @@ The purpose of this project is to create a export of an APEX application in JSON
 
 _This project is still undergoing active development. As such, configuration and command line options may change._
 
-# Prerequisites
+# Pre-requisites
 
 ## SQLcl
-This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-tools/sql-developer/downloads/index.html) (_Sep 23, 2015 or above_) is installed. It is used for its ability to quickly output queries in JSON format and cursor support.
+This projects requires that [SQLcl](http://www.oracle.com/technetwork/developer-tools/sql-developer/downloads/index.html) (_Oct 13, 2015 or above_) is installed. It is used for its ability to quickly output queries in JSON format and cursor support.
 
 Mac users can find additional information on how to install and configre SQLcl [here](http://www.talkapex.com/2015/04/installing-sqlcl.html).
 
-To find the current version of SQLcl, simply run SQLcl and it will be displayed. Minimum required version is `SQLcl: Release 4.2.0.15.265.1501 RC`.
+To find the current version of SQLcl, simply run SQLcl and it will be displayed. Minimum required version is `SQLcl: Release 4.2.0.15.286.1242 RC`.
 
 ## Node.js
 [Node.js](https://nodejs.org) version 0.12.x or greater is required. To find your current version run:
@@ -147,3 +147,8 @@ If you get it, you my need to add the following to `apex-diff.sql`:
 ```sql
 alter system set "_projection_pushdown" = false scope=memory;
 ```
+
+# Support
+If you're having issues the following are common problems that people have:
+
+- Make sure that your version of Node.js is up to date

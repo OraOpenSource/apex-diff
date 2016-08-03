@@ -251,7 +251,9 @@ if (options.dev.runSql){
 debug('\nReading .json file');
 sql.files.json.data = fs.readFileSync(sql.files.json.fileName, 'utf8');
 //Convert string to JSON
+debug('\nParsing .json File');
 sql.files.json.data = JSON.parse(sql.files.json.data);
+debug('\nDone parsing .json file');
 logTime();
 
 
