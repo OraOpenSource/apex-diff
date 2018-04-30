@@ -109,6 +109,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     and ad.apex_view_name not like 'APEX_TEAM%'
     and ad.apex_view_name not like 'APEX_WORKSPACE%'
     and ad.apex_view_name not like 'APEX_WS%'
+    and ad.apex_view_name not like 'APEX_REST%' -- #20: APEX_REST queries don't have application_id
     and ad.apex_view_name not in (
       'APEX_APPLICATIONS',
       'APEX_APPLICATION_GROUPS',
