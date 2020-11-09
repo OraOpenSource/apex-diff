@@ -77,17 +77,17 @@ var
     files : {
       path : path.resolve(__dirname,'source'),
       json : {
-        fileName : 'f' + arguments.appId + '.json',
+        fileName : 'f' + arguments.appId + '_' + arguments.connectionName + '.json',
         data : ''
       },
       apexDiff : {
         fileName : 'apex-diff.sql',
-        params : '%APP_ID% %SPOOL_FILENAME%',
+        params : '%APP_ID% ' + arguments.connectionName + ' %SPOOL_FILENAME%',
         fullPath : ''
       },
       generateJson : {
         fileName : 'temp.sql',
-        params : '%APP_ID%',
+        params : '%APP_ID% ' + arguments.connectionName,
         fullPath : ''
       }
     }
@@ -258,23 +258,23 @@ logTime();
 
 
 debug('\nFiltering JSON');
-for (var apexView in sql.files.json.data.items[0]){
+for (var apexView in sql.files.json.data.results[0].items[0]){
   // This loop is the list of APEX views.
   // If delete slows things down can look at setting to undefined
   // http://stackoverflow.com/questions/208105/how-to-remove-a-property-from-a-javascript-object
   //Check to see about removing entire APEX view itself.
   if (filterObject(apexView)){
     debug('Deleting:', apexView);
-    delete sql.files.json.data.items[0][apexView];
+    delete sql.files.json.data.results[0].items[0][apexView];
   }
   else{
     // view not filtered, now check array of objects
-    for (var apexViewAttrPos in sql.files.json.data.items[0][apexView]){
+    for (var apexViewAttrPos in sql.files.json.data.results[0].items[0][apexView]){
       //Loop over each element/attribte
-      for (var apexViewAttrName in sql.files.json.data.items[0][apexView][apexViewAttrPos]){
+      for (var apexViewAttrName in sql.files.json.data.results[0].items[0][apexView][apexViewAttrPos]){
         if (filterObject(apexView + '.' + apexViewAttrName)){
           debug('Deleting:', apexView + '.' + apexViewAttrName);
-          delete sql.files.json.data.items[0][apexView][apexViewAttrPos][apexViewAttrName];
+          delete sql.files.json.data.results[0].items[0][apexView][apexViewAttrPos][apexViewAttrName];
         }
       }//j
     }//i
