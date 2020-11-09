@@ -77,17 +77,17 @@ var
     files : {
       path : path.resolve(__dirname,'source'),
       json : {
-        fileName : 'f' + arguments.appId + '.json',
+        fileName : 'f' + arguments.appId + '_' + arguments.connectionName + '.json',
         data : ''
       },
       apexDiff : {
         fileName : 'apex-diff.sql',
-        params : '%APP_ID% %SPOOL_FILENAME%',
+        params : '%APP_ID% ' + arguments.connectionName + ' %SPOOL_FILENAME%',
         fullPath : ''
       },
       generateJson : {
         fileName : 'temp.sql',
-        params : '%APP_ID%',
+        params : '%APP_ID% ' + arguments.connectionName,
         fullPath : ''
       }
     }

@@ -7,7 +7,8 @@ set linesize 9999
 
 
 define APP_ID = '&1'
-define SPOOL_FILENAME = '&2'
+define CON_NAME = '&2'
+define SPOOL_FILENAME = '&3'
 
 spool &SPOOL_FILENAME.
 declare
@@ -52,8 +53,9 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   dbms_output.put_line('');
   -- Variables (this is for the auto build file)
   dbms_output.put_line('define APP_ID = ''' || chr(38) || '1''');
+  dbms_output.put_line('define CON_NAME = ''' || chr(38) || '2''');
   dbms_output.put_line('');
-  dbms_output.put_line('spool f' || chr(38) || 'APP_ID..json');
+  dbms_output.put_line('spool f' || chr(38) || 'APP_ID._' || chr(38) || 'CON_NAME..json');
 
 
   -- Creating parent select statement
