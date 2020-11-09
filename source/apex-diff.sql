@@ -44,7 +44,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
   dbms_output.put_line('-- File genereted from apex-diff.sql');
   dbms_output.put_line('-- DO NOT MODIFY THIS FILE');
   dbms_output.put_line('');
-  dbms_output.put_line('set sqlformat json');
+  dbms_output.put_line('set sqlformat json-formatted');
   dbms_output.put_line('set feedback off');
   dbms_output.put_line('set termout off');
   dbms_output.put_line('set verify off'); -- Removes the old/new sub string
@@ -110,6 +110,7 @@ order by %ORDER_BY%) "%APEX_VIEW_NAME%"';
     and ad.apex_view_name not like 'APEX_WORKSPACE%'
     and ad.apex_view_name not like 'APEX_WS%'
     and ad.apex_view_name not like 'APEX_REST%' -- #20: APEX_REST queries don't have application_id
+	and ad.apex_view_name not like 'APEX_WEBSERVICE%'
     and ad.apex_view_name not in (
       'APEX_APPLICATIONS',
       'APEX_APPLICATION_GROUPS',
